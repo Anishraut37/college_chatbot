@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chat Assistant</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #dbe4ff;
+            font-family: "Poppins", sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            width: 450px;
+            height: 600px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            height: 60px;
+            background: #4263eb;
+            color: white;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .header-buttons button {
+            background: #364fc7;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: white;
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .header-buttons button:hover {
+            background: #243b94;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .user-msg, .bot-msg {
+            max-width: 70%;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 10px;
+            display: inline-block;
+            clear: both;
+        }
+
+        .user-msg {
+            background: #4dabf7;
+            color: white;
+            float: right;
+        }
+
+        .bot-msg {
+            background: #e9ecef;
+            float: left;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #ccc;
+            gap: 8px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #aaa;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 18px;
+            background: #4263eb;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #micBtn {
+            padding: 12px;
+            width: 50px;
+            background: #4dabf7;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        #micBtn.listening {
+            background: red;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h3>AI Chat Assistant</h3>
+
+        <!-- ⭐ Replaced anchor tags with BUTTONS -->
+        <div class="header-buttons">
+            <button onclick="window.location.href='/history/'">History</button>
+            <button onclick="window.location.href='/logout/'">Logout</button>
+        </div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-box">
+        <button id="micBtn">🎤</button>
+        <input id="question" placeholder="Speak or type...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+// -------------------- SEND MESSAGE --------------------
+function sendMessage() {
+    let q = document.getElementById("question").value;
+    if (q.trim() === "") return;
+
+    let msgBox = document.getElementById("messages");
+
+    msgBox.innerHTML += `<div class='user-msg'>${q}</div>`;
+    document.getElementById("question").value = "";
+
+    fetch("/ask/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
+        body: JSON.stringify({ question: q })
+    })
+    .then(response => response.json())
+    .then(data => {
+        msgBox.innerHTML += `<div class='bot-msg'>${data.answer}</div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+    });
+}
+
+// -------------------- VOICE INPUT --------------------
+document.getElementById("micBtn").addEventListener("click", function () {
+
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("Voice recognition works only in Chrome browser.");
+        return;
+    }
+
+    const recognition = new webkitSpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+
+    let mic = document.getElementById("micBtn");
+    mic.classList.add("listening");
+    mic.innerText = "🎙️";
+
+    recognition.start();
+
+    recognition.onresult = function (event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("question").value = text;
+        mic.classList.remove("listening");
+        mic.innerText = "🎤";
+    };
+
+    recognition.onerror = function () {
+        mic.classList.remove("listening");
+        mic.innerText = "🎤";
+        alert("Voice not detected. Try again.");
+    };
+});
+</script>
+
+</body>
+</html>

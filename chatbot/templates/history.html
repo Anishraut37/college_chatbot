@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Chat History</title>
+    <style>
+        body {
+            font-family: "Poppins", sans-serif;
+            background: #dbe4ff;
+            padding: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Scrollable Chat Container */
+        .container {
+            background: white;
+            width: 70%;
+            margin: auto;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            max-height: 500px;         /* ⭐ Enables scrolling */
+            overflow-y: auto;          /* ⭐ Scrollbar */
+            padding-right: 10px;
+        }
+
+        .chat-item {
+            background: #f1f3f5;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .q {
+            font-weight: bold;
+            color: #4263eb;
+        }
+
+        .a {
+            margin-top: 6px;
+        }
+
+        a {
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Your Chat History</h2>
+
+<!-- ⭐ DELETE HISTORY BUTTON -->
+<div style="text-align:center; margin-bottom:20px;">
+    <a href="/delete-history/"
+       style="background:#ff6b6b; padding:10px 20px; color:white;
+              border-radius:8px; text-decoration:none; font-weight:bold;"
+       onclick="return confirm('Are you sure you want to delete all chat history?');">
+       🗑 Delete All History
+    </a>
+</div>
+
+<!-- ⭐ Scrollable Chat History Box -->
+<div class="container">
+    {% for chat in chats %}
+    <div class="chat-item">
+        <div class="q">Q: {{ chat.question }}</div>
+        <div class="a">A: {{ chat.answer }}</div>
+        <small style="color: gray;">{{ chat.timestamp }}</small>
+    </div>
+    {% empty %}
+    <p>No chat history yet.</p>
+    {% endfor %}
+</div>
+
+<br>
+
+<div style="text-align:center;">
+    <a href="/chatbot/">⬅ Back to Chat</a>
+</div>
+
+</body>
+</html>
