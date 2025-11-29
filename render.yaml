@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: college-chatbot
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn college_chatbot.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
